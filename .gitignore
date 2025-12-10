@@ -1,4 +1,4 @@
-.qt
+.qt/
 __pycache__/
 *.pyc
 *.pyo

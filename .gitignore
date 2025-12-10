@@ -1,0 +1,6 @@
+.qt
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+mriImages/

@@ -132,16 +132,18 @@ def kspace2Image(folder):
 
     return results
 
-# Example usage (uncomment to test):
-# results = kspace2Image("Raw Data")
-# print(f"Converted {len(results)} files to [kspace, image] pairs")
-results = kspace2Image("Raw Data")
-for idx, (kspace, image) in enumerate(results):
-    plt.figure(figsize=(10, 4))
-    plt.subplot(1, 2, 1)
-    plt.title(f"K-space {idx}")
-    plt.imshow(np.log1p(np.abs(kspace)), cmap='gray')
-    plt.subplot(1, 2, 2)
-    plt.title(f"Image {idx}")
-    plt.imshow(image, cmap='gray')
-plt.show()
+if __name__ == "__main__":
+
+    # Example usage (uncomment to test):
+    # results = kspace2Image("Raw Data")
+    # print(f"Converted {len(results)} files to [kspace, image] pairs")
+    results = kspace2Image("Raw Data")
+    for idx, (kspace, image) in enumerate(results):
+        plt.figure(figsize=(10, 4))
+        plt.subplot(1, 2, 1)
+        plt.title(f"K-space {idx}")
+        plt.imshow(np.log1p(np.abs(kspace)), cmap='gray')
+        plt.subplot(1, 2, 2)
+        plt.title(f"Image {idx}")
+        plt.imshow(image, cmap='gray')
+    plt.show()

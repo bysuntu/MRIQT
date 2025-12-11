@@ -744,6 +744,12 @@ class ImageWithLine(QWidget):
         form_layout.addRow("Line Length:", self.line_length_spinbox)
 
         params_vlayout.addLayout(form_layout)
+
+        # Post Processing button
+        self.post_processing_btn = QPushButton("Post Processing")
+        self.post_processing_btn.clicked.connect(self.post_processing)
+        params_vlayout.addWidget(self.post_processing_btn)
+
         line_params_group.setLayout(params_vlayout)
         right_layout.addWidget(line_params_group)
         right_layout.addStretch()
@@ -944,6 +950,26 @@ class ImageWithLine(QWidget):
     def update_lines(self):
         """Update the display when line parameters change"""
         self.label.update()
+
+    def post_processing(self):
+        """Call kspace2Image function to convert k-space data to image"""
+        try:
+            # Call the kspace2image function with "Raw Data" as default folder
+            kspace2Image("Raw Data")
+
+            # Show success alert popup
+            QMessageBox.information(
+                self,
+                "Post Processing Complete",
+                "K-space to image conversion has been completed successfully!"
+            )
+        except Exception as e:
+            # Show error alert if conversion fails
+            QMessageBox.critical(
+                self,
+                "Post Processing Error",
+                f"An error occurred during k-space to image conversion:\n{str(e)}"
+            )
 
     def save_scan_to_patient(self):
         """Save the currently loaded MRI scan to a patient record"""

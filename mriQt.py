@@ -29,14 +29,14 @@ class PatientDatabaseDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Patient Database")
-        self.setGeometry(200, 200, 900, 600)
+        self.setGeometry(200, 200, 700, 500)
 
         # Set dark theme for dialog
         self.setStyleSheet("""
             QDialog {
                 background-color: #2b2b2b;
                 color: #ffffff;
-                font-size: 12pt;
+                font-size: 10pt;
             }
             QTableWidget {
                 background-color: #3a3a3a;
@@ -48,16 +48,18 @@ class PatientDatabaseDialog(QDialog):
             QHeaderView::section {
                 background-color: #4a4a4a;
                 color: #ffffff;
-                padding: 5px;
+                padding: 3px;
                 border: 1px solid #666666;
                 font-weight: bold;
+                font-size: 10pt;
             }
             QPushButton {
                 background-color: #4a4a4a;
                 border: 1px solid #666666;
                 border-radius: 3px;
-                padding: 5px;
+                padding: 3px;
                 color: #ffffff;
+                font-size: 10pt;
             }
             QPushButton:hover {
                 background-color: #5a5a5a;
@@ -180,7 +182,7 @@ class FrontPage(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("MRI DICOM System")
-        self.setGeometry(100, 100, 600, 300)
+        self.setGeometry(100, 100, 450, 220)
 
         # Remove default window frame for custom dark theme
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -213,8 +215,9 @@ class FrontPage(QWidget):
             }
         """)
 
-        # Create main layout
+        # Create main layout with tight margins
         layout = QVBoxLayout()
+        layout.setContentsMargins(5, 5, 5, 5)  # Very small margins
 
         # Title bar with close button
         title_bar = QHBoxLayout()
@@ -252,10 +255,11 @@ class FrontPage(QWidget):
 
         # Create horizontal layout for buttons
         button_layout = QHBoxLayout()
-        button_layout.setSpacing(15)
+        button_layout.setSpacing(5)  # Very small spacing between buttons
+        button_layout.setContentsMargins(10, 10, 10, 10)  # Reduce margins around the button group
 
         # Connection button with overlapping status indicator
-        button_size = 80
+        button_size = 60
 
         # Create a container widget for connection button to enable absolute positioning
         connection_container = QWidget()
@@ -270,13 +274,13 @@ class FrontPage(QWidget):
         self.connection_btn.setStyleSheet("""
             QPushButton {
                 background-color: #4a4a4a;
-                border: 2px solid #666666;
-                border-radius: 10px;
+                border: 1px solid #666666;
+                border-radius: 5px;
                 padding: 0px;
             }
             QPushButton:hover {
                 background-color: #5a5a5a;
-                border: 2px solid #888888;
+                border: 1px solid #888888;
             }
             QPushButton:pressed {
                 background-color: #3a3a3a;
@@ -287,8 +291,8 @@ class FrontPage(QWidget):
         icon_path = os.path.join(os.path.dirname(__file__), "icons", "connection.svg")
         if os.path.exists(icon_path):
             self.connection_btn.setIcon(QIcon(icon_path))
-            # Make icon slightly smaller than button to account for border
-            self.connection_btn.setIconSize(QSize(button_size - 10, button_size - 10))
+            # Make icon fit the smaller button
+            self.connection_btn.setIconSize(QSize(button_size - 6, button_size - 6))
             self.connection_btn.setToolTip("Connection")  # Add tooltip for accessibility
         else:
             # Fallback if icon not found
@@ -296,10 +300,10 @@ class FrontPage(QWidget):
 
         # Status label overlapping at upper right corner of button
         self.connection_status = QLabel("", connection_container)
-        self.connection_status.setStyleSheet("font-size: 24pt; padding: 0px; background-color: transparent;")
+        self.connection_status.setStyleSheet("font-size: 16pt; padding: 0px; background-color: transparent;")
         self.connection_status.setAlignment(Qt.AlignCenter)
-        self.connection_status.setFixedSize(50, 50)
-        self.connection_status.move(button_size - 50, 0)  # Position at upper right corner
+        self.connection_status.setFixedSize(30, 30)
+        self.connection_status.move(button_size - 30, 0)  # Position at upper right corner
         self.connection_status.raise_()  # Bring to front
 
         button_layout.addWidget(connection_container)
@@ -313,13 +317,13 @@ class FrontPage(QWidget):
         self.operation_btn.setStyleSheet("""
             QPushButton {
                 background-color: #4a4a4a;
-                border: 2px solid #666666;
-                border-radius: 10px;
+                border: 1px solid #666666;
+                border-radius: 5px;
                 padding: 0px;
             }
             QPushButton:hover {
                 background-color: #5a5a5a;
-                border: 2px solid #888888;
+                border: 1px solid #888888;
             }
             QPushButton:pressed {
                 background-color: #3a3a3a;
@@ -330,7 +334,7 @@ class FrontPage(QWidget):
         operation_icon_path = os.path.join(os.path.dirname(__file__), "icons", "acquisition.svg")
         if os.path.exists(operation_icon_path):
             self.operation_btn.setIcon(QIcon(operation_icon_path))
-            self.operation_btn.setIconSize(QSize(button_size - 10, button_size - 10))
+            self.operation_btn.setIconSize(QSize(button_size - 6, button_size - 6))
             self.operation_btn.setToolTip("Operation")
         else:
             self.operation_btn.setText("Operation")
@@ -346,13 +350,13 @@ class FrontPage(QWidget):
         self.checking_btn.setStyleSheet("""
             QPushButton {
                 background-color: #4a4a4a;
-                border: 2px solid #666666;
-                border-radius: 10px;
+                border: 1px solid #666666;
+                border-radius: 5px;
                 padding: 0px;
             }
             QPushButton:hover {
                 background-color: #5a5a5a;
-                border: 2px solid #888888;
+                border: 1px solid #888888;
             }
             QPushButton:pressed {
                 background-color: #3a3a3a;
@@ -363,7 +367,7 @@ class FrontPage(QWidget):
         checking_icon_path = os.path.join(os.path.dirname(__file__), "icons", "checking.svg")
         if os.path.exists(checking_icon_path):
             self.checking_btn.setIcon(QIcon(checking_icon_path))
-            self.checking_btn.setIconSize(QSize(button_size - 10, button_size - 10))
+            self.checking_btn.setIconSize(QSize(button_size - 6, button_size - 6))
             self.checking_btn.setToolTip("Checking")
         else:
             self.checking_btn.setText("Checking")
@@ -379,13 +383,13 @@ class FrontPage(QWidget):
         self.viewing_btn.setStyleSheet("""
             QPushButton {
                 background-color: #4a4a4a;
-                border: 2px solid #666666;
-                border-radius: 10px;
+                border: 1px solid #666666;
+                border-radius: 5px;
                 padding: 0px;
             }
             QPushButton:hover {
                 background-color: #5a5a5a;
-                border: 2px solid #888888;
+                border: 1px solid #888888;
             }
             QPushButton:pressed {
                 background-color: #3a3a3a;
@@ -396,7 +400,7 @@ class FrontPage(QWidget):
         viewing_icon_path = os.path.join(os.path.dirname(__file__), "icons", "viewing.svg")
         if os.path.exists(viewing_icon_path):
             self.viewing_btn.setIcon(QIcon(viewing_icon_path))
-            self.viewing_btn.setIconSize(QSize(button_size - 10, button_size - 10))
+            self.viewing_btn.setIconSize(QSize(button_size - 6, button_size - 6))
             self.viewing_btn.setToolTip("Viewing")
         else:
             self.viewing_btn.setText("Viewing")
@@ -404,7 +408,6 @@ class FrontPage(QWidget):
         button_layout.addWidget(self.viewing_btn)
 
         layout.addLayout(button_layout)
-        layout.addStretch()
 
         self.setLayout(layout)
 
@@ -459,7 +462,7 @@ class ImageWithLine(QWidget):
         super().__init__()
         self.parent_window = parent
         self.setWindowTitle("MRI DICOM Viewer with Line - Operation")
-        self.setGeometry(100, 100, 1200, 700)
+        self.setGeometry(100, 100, 1000, 600)
 
         # Remove default window frame for custom dark theme
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -549,6 +552,7 @@ class ImageWithLine(QWidget):
 
         # Create main layout
         main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(5, 5, 5, 5)  # Reduce margins
 
         # Top bar with back button and close button
         top_bar = QHBoxLayout()
@@ -585,22 +589,31 @@ class ImageWithLine(QWidget):
 
         # Content layout
         content_layout = QHBoxLayout()
+        content_layout.setContentsMargins(5, 5, 5, 5)  # Reduce margins
+        content_layout.setSpacing(5)  # Reduce spacing between sections
 
         # Left side - Patient Demographics
         left_layout = QVBoxLayout()
+        left_layout.setSpacing(3)  # Reduce spacing between elements
 
         # Patient information group box
         patient_info_group = QGroupBox("Patient Information")
+        patient_info_group.setStyleSheet("font-size: 10pt;")  # Smaller font
         patient_form = QFormLayout()
+        patient_form.setVerticalSpacing(3)  # Reduce vertical spacing
+        patient_form.setHorizontalSpacing(5)  # Reduce horizontal spacing
+        patient_form.setFieldGrowthPolicy(QFormLayout.FieldsStayAtSizeHint)  # Prevent expansion
 
         # Name field
         self.name_input = QLineEdit()
         self.name_input.setPlaceholderText("Enter patient name")
+        self.name_input.setStyleSheet("padding: 2px; font-size: 10pt;")  # Smaller font and padding
         patient_form.addRow("Name:", self.name_input)
 
         # IC (Identification Card) field
         self.ic_input = QLineEdit()
         self.ic_input.setPlaceholderText("Enter IC number")
+        self.ic_input.setStyleSheet("padding: 2px; font-size: 10pt;")  # Smaller font and padding
         patient_form.addRow("IC:", self.ic_input)
 
         # Date of Birth field
@@ -608,36 +621,88 @@ class ImageWithLine(QWidget):
         self.dob_input.setCalendarPopup(True)
         self.dob_input.setDate(QDate.currentDate())
         self.dob_input.setDisplayFormat("dd/MM/yyyy")
+        self.dob_input.setStyleSheet("padding: 2px; font-size: 10pt;")  # Smaller font and padding
         patient_form.addRow("Date of Birth:", self.dob_input)
 
         # Sex field
         self.sex_input = QComboBox()
         self.sex_input.addItems(["Male", "Female", "Other"])
+        self.sex_input.setStyleSheet("padding: 2px; font-size: 10pt;")  # Smaller font and padding
         patient_form.addRow("Sex:", self.sex_input)
 
         # Height field
         self.height_input = QLineEdit()
         self.height_input.setPlaceholderText("cm")
+        self.height_input.setStyleSheet("padding: 2px; font-size: 10pt;")  # Smaller font and padding
         patient_form.addRow("Height (cm):", self.height_input)
 
         # Weight field
         self.weight_input = QLineEdit()
         self.weight_input.setPlaceholderText("kg")
+        self.weight_input.setStyleSheet("padding: 2px; font-size: 10pt;")  # Smaller font and padding
         patient_form.addRow("Weight (kg):", self.weight_input)
 
         # Save button
         self.save_patient_btn = QPushButton("Save Patient Info")
         self.save_patient_btn.clicked.connect(self.save_patient_info)
+        self.save_patient_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4a4a4a;
+                border: 1px solid #666666;
+                border-radius: 3px;
+                padding: 3px;
+                color: #ffffff;
+                font-size: 10pt;
+            }
+            QPushButton:hover {
+                background-color: #5a5a5a;
+            }
+            QPushButton:pressed {
+                background-color: #3a3a3a;
+            }
+        """)
         patient_form.addRow(self.save_patient_btn)
 
         # Clear button
         self.clear_patient_btn = QPushButton("Clear Form")
         self.clear_patient_btn.clicked.connect(self.clear_patient_form)
+        self.clear_patient_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4a4a4a;
+                border: 1px solid #666666;
+                border-radius: 3px;
+                padding: 3px;
+                color: #ffffff;
+                font-size: 10pt;
+            }
+            QPushButton:hover {
+                background-color: #5a5a5a;
+            }
+            QPushButton:pressed {
+                background-color: #3a3a3a;
+            }
+        """)
         patient_form.addRow(self.clear_patient_btn)
 
         # View database button
         self.view_db_btn = QPushButton("View All Patients")
         self.view_db_btn.clicked.connect(self.view_database)
+        self.view_db_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4a4a4a;
+                border: 1px solid #666666;
+                border-radius: 3px;
+                padding: 3px;
+                color: #ffffff;
+                font-size: 10pt;
+            }
+            QPushButton:hover {
+                background-color: #5a5a5a;
+            }
+            QPushButton:pressed {
+                background-color: #3a3a3a;
+            }
+        """)
         patient_form.addRow(self.view_db_btn)
 
         patient_info_group.setLayout(patient_form)
@@ -646,21 +711,54 @@ class ImageWithLine(QWidget):
 
         # Center - Image display
         center_layout = QVBoxLayout()
+        center_layout.setSpacing(3)  # Reduce spacing between elements
 
         # Image label - Custom label for drawing lines
         self.label = ImageLabel("Load DICOM images to begin", self)
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setMinimumSize(512, 512)
+        self.label.setMinimumSize(400, 400)  # Reduce minimum size
         self.label.setStyleSheet("border: 1px solid #555555; background-color: #1a1a1a;")
 
         # Load button
         self.load_button = QPushButton("Load DICOM Images")
         self.load_button.clicked.connect(self.load_images)
+        self.load_button.setStyleSheet("""
+            QPushButton {
+                background-color: #4a4a4a;
+                border: 1px solid #666666;
+                border-radius: 3px;
+                padding: 3px;
+                color: #ffffff;
+                font-size: 10pt;
+            }
+            QPushButton:hover {
+                background-color: #5a5a5a;
+            }
+            QPushButton:pressed {
+                background-color: #3a3a3a;
+            }
+        """)
 
         # Save scan button
         self.save_scan_button = QPushButton("Save Scan to Patient")
         self.save_scan_button.clicked.connect(self.save_scan_to_patient)
         self.save_scan_button.setEnabled(False)
+        self.save_scan_button.setStyleSheet("""
+            QPushButton {
+                background-color: #4a4a4a;
+                border: 1px solid #666666;
+                border-radius: 3px;
+                padding: 3px;
+                color: #ffffff;
+                font-size: 10pt;
+            }
+            QPushButton:hover {
+                background-color: #5a5a5a;
+            }
+            QPushButton:pressed {
+                background-color: #3a3a3a;
+            }
+        """)
 
         # Slider
         self.slider = QSlider(Qt.Horizontal)
@@ -673,6 +771,7 @@ class ImageWithLine(QWidget):
         # Slider label
         self.slider_label = QLabel("Image: 0 / 0")
         self.slider_label.setAlignment(Qt.AlignCenter)
+        self.slider_label.setStyleSheet("font-size: 10pt; padding: 0px;")
 
         center_layout.addWidget(self.label)
         center_layout.addWidget(self.load_button)
@@ -682,15 +781,20 @@ class ImageWithLine(QWidget):
 
         # Right side - Line parameters
         right_layout = QVBoxLayout()
+        right_layout.setSpacing(3)  # Reduce spacing between elements
 
         # Line parameters group box
         line_params_group = QGroupBox("Parallel Lines Parameters")
         params_vlayout = QVBoxLayout()
+        params_vlayout.setContentsMargins(5, 10, 5, 5)  # Reduce margins
+        params_vlayout.setSpacing(3)  # Reduce spacing between elements
 
         # Angle control
         angle_layout = QVBoxLayout()
+        angle_layout.setSpacing(2)  # Reduce spacing
         self.angle_label = QLabel("Angle: 0.0°")
         self.angle_label.setAlignment(Qt.AlignCenter)
+        self.angle_label.setStyleSheet("font-size: 10pt;")  # Smaller font
         self.degree_slider = QSlider(Qt.Horizontal)
         self.degree_slider.setRange(0, 3600)  # 0 to 360.0 degrees (in tenths)
         self.degree_slider.setValue(0)
@@ -703,6 +807,8 @@ class ImageWithLine(QWidget):
 
         # Form layout for other parameters
         form_layout = QFormLayout()
+        form_layout.setVerticalSpacing(3)  # Reduce vertical spacing
+        form_layout.setHorizontalSpacing(5)  # Reduce horizontal spacing
 
         # Thickness (distance between lines) input
         self.thickness_spinbox = QSpinBox()
@@ -710,6 +816,7 @@ class ImageWithLine(QWidget):
         self.thickness_spinbox.setValue(20)
         self.thickness_spinbox.setSuffix(" px")
         self.thickness_spinbox.valueChanged.connect(self.update_lines)
+        self.thickness_spinbox.setStyleSheet("padding: 2px; font-size: 10pt;")  # Smaller font and pad
         form_layout.addRow("Line Spacing:", self.thickness_spinbox)
 
         # Number of lines input
@@ -717,6 +824,7 @@ class ImageWithLine(QWidget):
         self.num_lines_spinbox.setRange(1, 50)
         self.num_lines_spinbox.setValue(5)
         self.num_lines_spinbox.valueChanged.connect(self.update_lines)
+        self.num_lines_spinbox.setStyleSheet("padding: 2px; font-size: 10pt;")  # Smaller font and pad
         form_layout.addRow("Number of Lines:", self.num_lines_spinbox)
 
         # Origin X input
@@ -725,6 +833,7 @@ class ImageWithLine(QWidget):
         self.origin_x_spinbox.setValue(256)
         self.origin_x_spinbox.setSuffix(" px")
         self.origin_x_spinbox.valueChanged.connect(self.update_lines)
+        self.origin_x_spinbox.setStyleSheet("padding: 2px; font-size: 10pt;")  # Smaller font and pad
         form_layout.addRow("Origin X:", self.origin_x_spinbox)
 
         # Origin Y input
@@ -733,6 +842,7 @@ class ImageWithLine(QWidget):
         self.origin_y_spinbox.setValue(256)
         self.origin_y_spinbox.setSuffix(" px")
         self.origin_y_spinbox.valueChanged.connect(self.update_lines)
+        self.origin_y_spinbox.setStyleSheet("padding: 2px; font-size: 10pt;")  # Smaller font and pad
         form_layout.addRow("Origin Y:", self.origin_y_spinbox)
 
         # Line length input
@@ -741,6 +851,7 @@ class ImageWithLine(QWidget):
         self.line_length_spinbox.setValue(500)
         self.line_length_spinbox.setSuffix(" px")
         self.line_length_spinbox.valueChanged.connect(self.update_lines)
+        self.line_length_spinbox.setStyleSheet("padding: 2px; font-size: 10pt;")  # Smaller font and pad
         form_layout.addRow("Line Length:", self.line_length_spinbox)
 
         params_vlayout.addLayout(form_layout)
@@ -748,6 +859,22 @@ class ImageWithLine(QWidget):
         # Post Processing button
         self.post_processing_btn = QPushButton("Post Processing")
         self.post_processing_btn.clicked.connect(self.post_processing)
+        self.post_processing_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4a4a4a;
+                border: 1px solid #666666;
+                border-radius: 3px;
+                padding: 3px;
+                color: #ffffff;
+                font-size: 10pt;
+            }
+            QPushButton:hover {
+                background-color: #5a5a5a;
+            }
+            QPushButton:pressed {
+                background-color: #3a3a3a;
+            }
+        """)
         params_vlayout.addWidget(self.post_processing_btn)
 
         line_params_group.setLayout(params_vlayout)

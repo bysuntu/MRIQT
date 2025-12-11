@@ -225,18 +225,18 @@ class FrontPage(QWidget):
         # Title
         title = QLabel("MRI DICOM System")
         title.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        title.setStyleSheet("font-size: 18pt; font-weight: bold; margin: 5px;")
+        title.setStyleSheet("font-size: 14pt; font-weight: bold; margin: 3px;")
         title_bar.addWidget(title)
 
         # Close button
         close_btn = QPushButton("×")
-        close_btn.setFixedSize(40, 40)
+        close_btn.setFixedSize(30, 30)
         close_btn.setStyleSheet("""
             QPushButton {
                 background-color: transparent;
                 border: none;
                 color: #ffffff;
-                font-size: 32pt;
+                font-size: 20pt;
                 font-weight: bold;
                 padding: 0px;
             }
@@ -564,13 +564,13 @@ class ImageWithLine(QWidget):
 
         # Close button
         close_btn = QPushButton("×")
-        close_btn.setFixedSize(40, 40)
+        close_btn.setFixedSize(30, 30)
         close_btn.setStyleSheet("""
             QPushButton {
                 background-color: transparent;
                 border: none;
                 color: #ffffff;
-                font-size: 32pt;
+                font-size: 20pt;
                 font-weight: bold;
                 padding: 0px;
             }

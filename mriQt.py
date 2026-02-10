@@ -9,9 +9,9 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QVBoxLayout,
                              QGroupBox, QSpinBox, QFormLayout, QLineEdit,
                              QComboBox, QDateEdit, QMessageBox, QTableWidget,
                              QTableWidgetItem, QDialog, QVBoxLayout as QVBoxLayoutDialog,
-                             QHeaderView, QInputDialog, QTextEdit)
+                             QHeaderView, QInputDialog, QTextEdit, QDesktopWidget)
 from PyQt5.QtGui import QPixmap, QPainter, QPen, QImage, QIcon
-from PyQt5.QtCore import Qt, QPointF, QDate, QSize
+from PyQt5.QtCore import Qt, QPointF, QDate, QSize, QTimer
 import math
 
 from dataprocessingpython import kspace2Image
@@ -182,7 +182,10 @@ class FrontPage(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("MRI DICOM System")
-        self.setGeometry(100, 100, 450, 220)
+        self.setFixedSize(450, 220)
+        # Center on screen
+        screen = QDesktopWidget().screenGeometry()
+        self.move((screen.width() - 450) // 2, (screen.height() - 220) // 2)
 
         # Remove default window frame for custom dark theme
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -228,21 +231,28 @@ class FrontPage(QWidget):
         title.setStyleSheet("font-size: 14pt; font-weight: bold; margin: 3px;")
         title_bar.addWidget(title)
 
-        # Close button
-        close_btn = QPushButton("×")
+        # Close button (drawn icon, same style as operation frame)
+        close_btn = QPushButton()
         close_btn.setFixedSize(30, 30)
+        close_pixmap = QPixmap(16, 16)
+        close_pixmap.fill(Qt.transparent)
+        painter = QPainter(close_pixmap)
+        painter.setPen(QPen(Qt.white, 2))
+        painter.drawLine(2, 2, 13, 13)
+        painter.drawLine(13, 2, 2, 13)
+        painter.end()
+        close_btn.setIcon(QIcon(close_pixmap))
+        close_btn.setIconSize(QSize(16, 16))
         close_btn.setStyleSheet("""
             QPushButton {
                 background-color: transparent;
                 border: none;
-                color: #ffffff;
-                font-size: 20pt;
-                font-weight: bold;
+                border-radius: 0px;
                 padding: 0px;
+                margin: 0px;
             }
             QPushButton:hover {
                 background-color: #ff0000;
-                color: #ffffff;
             }
             QPushButton:pressed {
                 background-color: #cc0000;
@@ -258,17 +268,18 @@ class FrontPage(QWidget):
         button_layout.setSpacing(5)  # Very small spacing between buttons
         button_layout.setContentsMargins(10, 10, 10, 10)  # Reduce margins around the button group
 
-        # Connection button with overlapping status indicator
         button_size = 60
 
-        # Create a container widget for connection button to enable absolute positioning
-        connection_container = QWidget()
-        connection_container.setFixedSize(button_size, button_size)
+        # Store connection icon paths for state changes
+        icons_dir = os.path.join(os.path.dirname(__file__), "icons")
+        self.connection_icon_default = os.path.join(icons_dir, "connection.svg")
+        self.connection_icon_connecting = os.path.join(icons_dir, "connecting.svg")
+        self.connection_icon_connected = os.path.join(icons_dir, "connected.svg")
 
-        self.connection_btn = QPushButton(connection_container)
+        # Connection button
+        self.connection_btn = QPushButton()
         self.connection_btn.clicked.connect(self.open_connection)
         self.connection_btn.setFixedSize(button_size, button_size)
-        self.connection_btn.move(0, 0)
 
         # Remove padding and make icon fill the button
         self.connection_btn.setStyleSheet("""
@@ -287,26 +298,15 @@ class FrontPage(QWidget):
             }
         """)
 
-        # Set SVG icon for connection button (replacing text)
-        icon_path = os.path.join(os.path.dirname(__file__), "icons", "connection.svg")
-        if os.path.exists(icon_path):
-            self.connection_btn.setIcon(QIcon(icon_path))
-            # Make icon fit the smaller button
+        # Set SVG icon for connection button
+        if os.path.exists(self.connection_icon_default):
+            self.connection_btn.setIcon(QIcon(self.connection_icon_default))
             self.connection_btn.setIconSize(QSize(button_size - 6, button_size - 6))
-            self.connection_btn.setToolTip("Connection")  # Add tooltip for accessibility
+            self.connection_btn.setToolTip("Connection")
         else:
-            # Fallback if icon not found
             self.connection_btn.setText("Connection")
 
-        # Status label overlapping at upper right corner of button
-        self.connection_status = QLabel("", connection_container)
-        self.connection_status.setStyleSheet("font-size: 16pt; padding: 0px; background-color: transparent;")
-        self.connection_status.setAlignment(Qt.AlignCenter)
-        self.connection_status.setFixedSize(30, 30)
-        self.connection_status.move(button_size - 30, 0)  # Position at upper right corner
-        self.connection_status.raise_()  # Bring to front
-
-        button_layout.addWidget(connection_container)
+        button_layout.addWidget(self.connection_btn)
 
         # Operation button
         self.operation_btn = QPushButton()
@@ -414,11 +414,25 @@ class FrontPage(QWidget):
         # Reference to operation window
         self.operation_window = None
 
+        # For window dragging
+        self._drag_pos = None
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self._drag_pos = event.globalPos() - self.frameGeometry().topLeft()
+
+    def mouseMoveEvent(self, event):
+        if self._drag_pos is not None and event.buttons() == Qt.LeftButton:
+            self.move(event.globalPos() - self._drag_pos)
+
+    def mouseReleaseEvent(self, event):
+        self._drag_pos = None
+
     def open_connection(self):
         """Open connection interface and check connection status"""
-        # Show checking message (clock icon)
-        self.connection_status.setText("🕐")
-        self.connection_status.setStyleSheet("font-size: 48pt; padding: 0px; background-color: transparent;")
+        # Show connecting icon (yellow) while checking
+        if os.path.exists(self.connection_icon_connecting):
+            self.connection_btn.setIcon(QIcon(self.connection_icon_connecting))
         QApplication.processEvents()  # Update UI immediately
 
         try:
@@ -426,21 +440,41 @@ class FrontPage(QWidget):
             result = checkConnection()
 
             if result == 0:
-                # Success - show green tick
-                self.connection_status.setText("✓")
-                self.connection_status.setStyleSheet("font-size: 64pt; padding: 0px; color: #00ff00; background-color: transparent;")
-                QMessageBox.information(self, "Connection", f"Connection successful!\nReturn code: {result}")
+                # Success - show connected icon (green)
+                if os.path.exists(self.connection_icon_connected):
+                    self.connection_btn.setIcon(QIcon(self.connection_icon_connected))
+                self.show_auto_close_message("Connection", f"Connection successful!\nReturn code: {result}")
             else:
-                # Failure - show red cross (thin version)
-                self.connection_status.setText("×")
-                self.connection_status.setStyleSheet("font-size: 64pt; padding: 0px; color: #ff0000; background-color: transparent;")
-                QMessageBox.warning(self, "Connection", f"Connection failed!\nReturn code: {result}")
+                # Failure - revert to default disconnected icon
+                if os.path.exists(self.connection_icon_default):
+                    self.connection_btn.setIcon(QIcon(self.connection_icon_default))
+                self.show_auto_close_message("Connection", f"Connection failed!\nReturn code: {result}")
 
         except Exception as e:
-            # Error - show red cross (thin version)
-            self.connection_status.setText("×")
-            self.connection_status.setStyleSheet("font-size: 64pt; padding: 0px; color: #ff0000; background-color: transparent;")
-            QMessageBox.critical(self, "Connection Error", f"Error during connection:\n{str(e)}")
+            # Error - revert to default disconnected icon
+            if os.path.exists(self.connection_icon_default):
+                self.connection_btn.setIcon(QIcon(self.connection_icon_default))
+            self.show_auto_close_message("Connection Error", f"Error during connection:\n{str(e)}")
+
+    def show_auto_close_message(self, title, text, duration=5000):
+        """Show a message dialog that auto-closes after duration (ms)"""
+        msg = QMessageBox(self)
+        msg.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
+        msg.setText(text)
+        msg.setStandardButtons(QMessageBox.NoButton)
+        msg.setStyleSheet("""
+            QMessageBox {
+                background-color: #2b2b2b;
+                border: 1px solid #666666;
+            }
+            QLabel {
+                color: #ffffff;
+                font-size: 12pt;
+                padding: 10px;
+            }
+        """)
+        QTimer.singleShot(duration, msg.accept)
+        msg.exec_()
 
     def open_operation(self):
         """Open operation interface (current GUI)"""
@@ -451,11 +485,11 @@ class FrontPage(QWidget):
 
     def open_checking(self):
         """Open checking interface"""
-        QMessageBox.information(self, "Checking", "Checking module - Coming soon!")
+        self.show_auto_close_message("Checking", "Checking module - Coming soon!")
 
     def open_viewing(self):
         """Open viewing interface"""
-        QMessageBox.information(self, "Viewing", "Viewing module - Coming soon!")
+        self.show_auto_close_message("Viewing", "Viewing module - Coming soon!")
 
 class ImageWithLine(QWidget):
     def __init__(self, parent=None):
@@ -554,35 +588,64 @@ class ImageWithLine(QWidget):
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(5, 5, 5, 5)  # Reduce margins
 
-        # Top bar with back button and close button
+        # Top bar with close button
         top_bar = QHBoxLayout()
-        self.back_btn = QPushButton("← Back to Main Menu")
-        self.back_btn.clicked.connect(self.go_back)
-        self.back_btn.setMaximumWidth(200)
-        top_bar.addWidget(self.back_btn)
         top_bar.addStretch()
 
-        # Close button
-        close_btn = QPushButton("×")
-        close_btn.setFixedSize(30, 30)
-        close_btn.setStyleSheet("""
-            QPushButton {
+        icons_dir = os.path.join(os.path.dirname(__file__), "icons")
+
+        # Style shared by title bar buttons
+        titlebar_btn_style = """
+            QPushButton {{
                 background-color: transparent;
                 border: none;
+                border-radius: 0px;
                 color: #ffffff;
-                font-size: 20pt;
-                font-weight: bold;
                 padding: 0px;
-            }
-            QPushButton:hover {
-                background-color: #ff0000;
-                color: #ffffff;
-            }
-            QPushButton:pressed {
-                background-color: #cc0000;
-            }
-        """)
-        close_btn.clicked.connect(self.close)
+                margin: 0px;
+            }}
+            QPushButton:hover {{
+                background-color: {hover};
+            }}
+            QPushButton:pressed {{
+                background-color: {pressed};
+            }}
+        """
+
+        # Maximize button
+        self.maximize_btn = QPushButton()
+        self.maximize_btn.setFixedSize(30, 30)
+        maximize_icon = QIcon(os.path.join(icons_dir, "maximize.svg")) if os.path.exists(os.path.join(icons_dir, "maximize.svg")) else QIcon()
+        if maximize_icon.isNull():
+            # Draw a square icon programmatically
+            pixmap = QPixmap(16, 16)
+            pixmap.fill(Qt.transparent)
+            painter = QPainter(pixmap)
+            painter.setPen(QPen(Qt.white, 2))
+            painter.drawRect(1, 1, 13, 13)
+            painter.end()
+            maximize_icon = QIcon(pixmap)
+        self.maximize_btn.setIcon(maximize_icon)
+        self.maximize_btn.setIconSize(QSize(16, 16))
+        self.maximize_btn.setStyleSheet(titlebar_btn_style.format(hover="#5a5a5a", pressed="#3a3a3a"))
+        self.maximize_btn.clicked.connect(self.toggle_maximize)
+        top_bar.addWidget(self.maximize_btn)
+
+        # Close button (returns to main menu)
+        close_btn = QPushButton()
+        close_btn.setFixedSize(30, 30)
+        # Draw an X icon programmatically
+        close_pixmap = QPixmap(16, 16)
+        close_pixmap.fill(Qt.transparent)
+        painter = QPainter(close_pixmap)
+        painter.setPen(QPen(Qt.white, 2))
+        painter.drawLine(2, 2, 13, 13)
+        painter.drawLine(13, 2, 2, 13)
+        painter.end()
+        close_btn.setIcon(QIcon(close_pixmap))
+        close_btn.setIconSize(QSize(16, 16))
+        close_btn.setStyleSheet(titlebar_btn_style.format(hover="#ff0000", pressed="#cc0000"))
+        close_btn.clicked.connect(self.go_back)
         top_bar.addWidget(close_btn)
 
         main_layout.addLayout(top_bar)
@@ -891,6 +954,20 @@ class ImageWithLine(QWidget):
 
         self.setLayout(main_layout)
 
+        # For window dragging
+        self._drag_pos = None
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self._drag_pos = event.globalPos() - self.frameGeometry().topLeft()
+
+    def mouseMoveEvent(self, event):
+        if self._drag_pos is not None and event.buttons() == Qt.LeftButton:
+            self.move(event.globalPos() - self._drag_pos)
+
+    def mouseReleaseEvent(self, event):
+        self._drag_pos = None
+
     def init_database(self):
         """Initialize SQLite database for patient information"""
         self.conn = sqlite3.connect('patient_data.db')
@@ -994,6 +1071,13 @@ class ImageWithLine(QWidget):
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to retrieve patient records:\n{str(e)}")
+
+    def toggle_maximize(self):
+        """Toggle between maximized and normal window state"""
+        if self.isMaximized():
+            self.showNormal()
+        else:
+            self.showMaximized()
 
     def go_back(self):
         """Return to front page"""

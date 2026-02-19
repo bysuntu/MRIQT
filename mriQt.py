@@ -182,10 +182,10 @@ class FrontPage(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("MRI DICOM System")
-        self.setFixedSize(450, 220)
+        self.setFixedSize(450, 100)  # Compact size to fit title bar and buttons
         # Center on screen
         screen = QDesktopWidget().screenGeometry()
-        self.move((screen.width() - 450) // 2, (screen.height() - 220) // 2)
+        self.move((screen.width() - 450) // 2, (screen.height() - 100) // 2)
 
         # Remove default window frame for custom dark theme
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -220,22 +220,17 @@ class FrontPage(QWidget):
 
         # Create main layout with tight margins
         layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 5)  # Tight top margin for title bar
+        layout.setContentsMargins(0, 0, 0, 0)  # No margins
+        layout.setSpacing(0)  # No spacing between elements
 
         # Title bar with close button
         title_bar = QHBoxLayout()
-        title_bar.setContentsMargins(5, 0, 0, 0)  # Tight margins for title bar
+        title_bar.setContentsMargins(0, 0, 0, 0)  # No margins
         title_bar.setSpacing(0)  # No spacing between elements
 
-        # Title
-        title = QLabel("MRI DICOM System")
-        title.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        title.setStyleSheet("font-size: 14pt; font-weight: bold; margin: 3px;")
-        title_bar.addWidget(title)
-
-        # Close button (drawn icon, same style as operation frame)
+        # Close button (drawn icon)
         close_btn = QPushButton()
-        close_btn.setFixedSize(30, 30)
+        close_btn.setFixedSize(28, 28)
         close_pixmap = QPixmap(16, 16)
         close_pixmap.fill(Qt.transparent)
         painter = QPainter(close_pixmap)
@@ -252,10 +247,8 @@ class FrontPage(QWidget):
                 border-radius: 0px;
                 padding: 0px;
                 margin: 0px;
-                min-width: 30px;
-                min-height: 30px;
-                max-width: 30px;
-                max-height: 30px;
+                width: 28px;
+                height: 28px;
             }
             QPushButton:hover {
                 background-color: #ff0000;
@@ -267,13 +260,17 @@ class FrontPage(QWidget):
         close_btn.clicked.connect(self.close)
         title_bar.addStretch()
         title_bar.addWidget(close_btn)
-
-        layout.addLayout(title_bar)
+        
+        # Wrap title bar in widget
+        title_bar_widget = QWidget()
+        title_bar_widget.setLayout(title_bar)
+        title_bar_widget.setFixedHeight(28)  # Fixed minimal height for close button
+        layout.addWidget(title_bar_widget, 0)
 
         # Create horizontal layout for buttons
         button_layout = QHBoxLayout()
         button_layout.setSpacing(5)  # Very small spacing between buttons
-        button_layout.setContentsMargins(10, 10, 10, 10)  # Reduce margins around the button group
+        button_layout.setContentsMargins(10, 0, 10, 0)  # Minimal margins
 
         button_size = 60
 
@@ -414,7 +411,11 @@ class FrontPage(QWidget):
 
         button_layout.addWidget(self.viewing_btn)
 
-        layout.addLayout(button_layout)
+        # Wrap button layout in widget
+        button_widget = QWidget()
+        button_widget.setLayout(button_layout)
+        button_widget.setFixedHeight(60)  # Fixed height to match button size
+        layout.addWidget(button_widget, 0)
 
         self.setLayout(layout)
 

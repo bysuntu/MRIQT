@@ -220,10 +220,12 @@ class FrontPage(QWidget):
 
         # Create main layout with tight margins
         layout = QVBoxLayout()
-        layout.setContentsMargins(5, 5, 5, 5)  # Very small margins
+        layout.setContentsMargins(0, 0, 0, 5)  # Tight top margin for title bar
 
         # Title bar with close button
         title_bar = QHBoxLayout()
+        title_bar.setContentsMargins(5, 0, 0, 0)  # Tight margins for title bar
+        title_bar.setSpacing(0)  # No spacing between elements
 
         # Title
         title = QLabel("MRI DICOM System")
@@ -250,6 +252,10 @@ class FrontPage(QWidget):
                 border-radius: 0px;
                 padding: 0px;
                 margin: 0px;
+                min-width: 30px;
+                min-height: 30px;
+                max-width: 30px;
+                max-height: 30px;
             }
             QPushButton:hover {
                 background-color: #ff0000;
@@ -259,6 +265,7 @@ class FrontPage(QWidget):
             }
         """)
         close_btn.clicked.connect(self.close)
+        title_bar.addStretch()
         title_bar.addWidget(close_btn)
 
         layout.addLayout(title_bar)
@@ -659,9 +666,50 @@ class ImageWithLine(QWidget):
         left_layout = QVBoxLayout()
         left_layout.setSpacing(3)  # Reduce spacing between elements
 
-        # Patient information group box
-        patient_info_group = QGroupBox("Patient Information")
-        patient_info_group.setStyleSheet("font-size: 10pt;")  # Smaller font
+        # Patient information group box with icon in title
+        patient_info_group = QGroupBox()
+        patient_info_group.setStyleSheet("""
+            QGroupBox {
+                font-size: 10pt;
+                padding-top: 10px;
+                margin-top: 8px;
+                border: 1px solid #555555;
+                border-radius: 3px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 3px 0 3px;
+            }
+        """)
+        
+        # Create header layout with icon and title
+        patient_header_layout = QHBoxLayout()
+        patient_header_layout.setContentsMargins(0, 0, 0, 0)
+        patient_header_layout.setSpacing(6)
+        
+        # Add icon
+        patient_icon_label = QLabel()
+        patient_icon = QIcon("icons/icon_patient info.svg")
+        patient_icon_label.setPixmap(patient_icon.pixmap(QSize(36, 36)))
+        patient_header_layout.addWidget(patient_icon_label)
+        
+        # Add title
+        patient_title_label = QLabel("Patient Information")
+        patient_title_label.setStyleSheet("font-size: 11pt; font-weight: bold; color: white;")
+        patient_header_layout.addWidget(patient_title_label)
+        patient_header_layout.addStretch()
+        
+        # Create header widget
+        patient_header_widget = QWidget()
+        patient_header_widget.setLayout(patient_header_layout)
+        
+        # Create a container layout for the group box
+        patient_container_layout = QVBoxLayout()
+        patient_container_layout.setContentsMargins(0, 0, 0, 0)
+        patient_container_layout.setSpacing(0)
+        patient_container_layout.addWidget(patient_header_widget)
+        
         patient_form = QFormLayout()
         patient_form.setVerticalSpacing(3)  # Reduce vertical spacing
         patient_form.setHorizontalSpacing(5)  # Reduce horizontal spacing
@@ -768,7 +816,12 @@ class ImageWithLine(QWidget):
         """)
         patient_form.addRow(self.view_db_btn)
 
-        patient_info_group.setLayout(patient_form)
+        # Add form to container layout
+        patient_container_layout.addLayout(patient_form)
+        patient_info_group.setLayout(patient_container_layout)
+        patient_info_group.setMinimumHeight(350)  # Set adequate height for content
+        
+        # Add group box to left layout
         left_layout.addWidget(patient_info_group)
         left_layout.addStretch()
 
@@ -847,7 +900,49 @@ class ImageWithLine(QWidget):
         right_layout.setSpacing(3)  # Reduce spacing between elements
 
         # Line parameters group box
-        line_params_group = QGroupBox("Parallel Lines Parameters")
+        line_params_group = QGroupBox()
+        line_params_group.setStyleSheet("""
+            QGroupBox {
+                font-size: 10pt;
+                padding-top: 10px;
+                margin-top: 8px;
+                border: 1px solid #555555;
+                border-radius: 3px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 3px 0 3px;
+            }
+        """)
+        
+        # Create header layout with icon and title
+        line_header_layout = QHBoxLayout()
+        line_header_layout.setContentsMargins(0, 0, 0, 0)
+        line_header_layout.setSpacing(6)
+        
+        # Add icon
+        line_icon_label = QLabel()
+        line_icon = QIcon("icons/icon_setting.svg")
+        line_icon_label.setPixmap(line_icon.pixmap(QSize(36, 36)))
+        line_header_layout.addWidget(line_icon_label)
+        
+        # Add title
+        line_title_label = QLabel("Lines Parameters")
+        line_title_label.setStyleSheet("font-size: 11pt; font-weight: bold; color: white;")
+        line_header_layout.addWidget(line_title_label)
+        line_header_layout.addStretch()
+        
+        # Create header widget
+        line_header_widget = QWidget()
+        line_header_widget.setLayout(line_header_layout)
+        
+        # Create a container layout for the group box
+        line_container_layout = QVBoxLayout()
+        line_container_layout.setContentsMargins(0, 0, 0, 0)
+        line_container_layout.setSpacing(0)
+        line_container_layout.addWidget(line_header_widget)
+        
         params_vlayout = QVBoxLayout()
         params_vlayout.setContentsMargins(5, 10, 5, 5)  # Reduce margins
         params_vlayout.setSpacing(3)  # Reduce spacing between elements
@@ -940,7 +1035,9 @@ class ImageWithLine(QWidget):
         """)
         params_vlayout.addWidget(self.post_processing_btn)
 
-        line_params_group.setLayout(params_vlayout)
+        # Add form layout to container
+        line_container_layout.addLayout(params_vlayout)
+        line_params_group.setLayout(line_container_layout)
         right_layout.addWidget(line_params_group)
         right_layout.addStretch()
 

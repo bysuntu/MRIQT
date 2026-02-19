@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?><svg width="64" height="64" viewBox="0 0 16.933333 16.933333" version="1.1" id="svg1" p1:version="1.4.2 (ebf0e940, 2025-05-08)" xmlns="http://www.w3.org/2000/svg" xmlns:p1="http://www.inkscape.org/namespaces/inkscape">
+  
+  <defs id="defs1" />
+  <g id="layer1">
+    <circle style="fill:#7b2cbf;fill-opacity:0.5;stroke:#7b2cbf;stroke-width:0.661458;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1" id="path1" cx="8.4666662" cy="8.4666662" r="1.4488771" />
+    <path p4:type="star" style="fill:#7b2cbf;fill-opacity:0.25;stroke:#7b2cbf;stroke-width:0.66145832;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1" id="path2" p4:cx="8.4666665" p4:cy="8.4666665" d="m 10.884035,3.2474507 0.138165,2.157625 2.147577,-0.2496981 -0.959158,1.9376405 1.984705,0.8575435 -1.799476,1.1984667 1.290034,1.7350067 -2.157625,0.138165 0.249698,2.147577 L 9.8403144,12.210619 8.9827708,14.195324 7.7843041,12.395848 6.049297,13.685882 5.9111323,11.528257 3.7635553,11.777955 4.7227137,9.8403144 2.7380084,8.9827708 4.5374841,7.7843041 3.2474507,6.049297 5.4050757,5.9111323 5.1553776,3.7635553 7.0930181,4.7227137 7.9505616,2.7380084 9.1490283,4.5374841 Z" xmlns:p4="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" />
+  </g>
+</svg>

@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QVBoxLayout,
                              QComboBox, QDateEdit, QMessageBox, QTableWidget,
                              QTableWidgetItem, QDialog, QVBoxLayout as QVBoxLayoutDialog,
                              QHeaderView, QInputDialog, QTextEdit, QDesktopWidget)
-from PyQt5.QtGui import QPixmap, QPainter, QPen, QImage, QIcon
+from PyQt5.QtGui import QPixmap, QPainter, QPen, QImage, QIcon, QColor
 from PyQt5.QtCore import Qt, QPointF, QDate, QSize, QTimer
 import math
 
@@ -107,72 +107,116 @@ class ImageLabel(QLabel):
     def __init__(self, text, parent):
         super().__init__(text)
         self.parent_widget = parent
+        self.loading_angle = 0  # For animation
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_animation)
+        self.timer.start(200)  # Update every 200ms for slower rotation
+
+    def update_animation(self):
+        """Update loading animation angle"""
+        if not self.pixmap() or self.pixmap().isNull():
+            self.loading_angle = (self.loading_angle + 3) % 360
+            self.update()
 
     def paintEvent(self, event):
-        # First draw the label (image) itself
-        super().paintEvent(event)
-
-        # Then draw lines on top if we have a pixmap
-        if self.pixmap() and not self.pixmap().isNull():
+        # If no pixmap, draw loading animation
+        if not self.pixmap() or self.pixmap().isNull():
             painter = QPainter(self)
+            painter.fillRect(event.rect(), self.palette().color(self.backgroundRole()))
+            
+            # Draw rotating loading spinner
+            center_x = self.width() // 2
+            center_y = self.height() // 2
+            
+            # Draw rotating circle spinner animation
             painter.setRenderHint(QPainter.Antialiasing)
+            
+            # Draw dots in a circle
+            num_dots = 8
+            radius = 40
+            for i in range(num_dots):
+                angle = (i * 360 / num_dots + self.loading_angle) % 360
+                angle_rad = math.radians(angle)
+                
+                x = center_x + radius * math.cos(angle_rad)
+                y = center_y + radius * math.sin(angle_rad)
+                
+                # Opacity based on position
+                opacity = 255 * (i + 1) // num_dots
+                color = QColor(100, 150, 255, opacity)
+                
+                painter.setBrush(color)
+                painter.drawEllipse(int(x) - 4, int(y) - 4, 8, 8)
+            
+            # Draw loading text
+            painter.setPen(QColor(200, 200, 200))
+            painter.setFont(self.font())
+            painter.drawText(event.rect(), Qt.AlignHCenter | Qt.AlignBottom, "Loading DICOM images...")
+        else:
+            # First draw the label (image) itself
+            super().paintEvent(event)
 
-            # Get the actual pixmap size within the label
-            label_width = self.width()
-            label_height = self.height()
+            # Then draw lines on top if we have a pixmap
+            if self.pixmap() and not self.pixmap().isNull():
+                painter = QPainter(self)
+                painter.setRenderHint(QPainter.Antialiasing)
 
-            scaled_pixmap = self.pixmap().scaled(label_width, label_height, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            pixmap_width = scaled_pixmap.width()
-            pixmap_height = scaled_pixmap.height()
+                # Get the actual pixmap size within the label
+                label_width = self.width()
+                label_height = self.height()
 
-            # Calculate the offset to center the pixmap within the label
-            pixmap_x = (label_width - pixmap_width) // 2
-            pixmap_y = (label_height - pixmap_height) // 2
+                scaled_pixmap = self.pixmap().scaled(label_width, label_height, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                pixmap_width = scaled_pixmap.width()
+                pixmap_height = scaled_pixmap.height()
 
-            # Set clipping region to the pixmap area only
-            painter.setClipRect(pixmap_x, pixmap_y, pixmap_width, pixmap_height)
+                # Calculate the offset to center the pixmap within the label
+                pixmap_x = (label_width - pixmap_width) // 2
+                pixmap_y = (label_height - pixmap_height) // 2
 
-            # Dotted line pen
-            pen = QPen(Qt.red, 2, Qt.DotLine)
-            painter.setPen(pen)
+                # Set clipping region to the pixmap area only
+                painter.setClipRect(pixmap_x, pixmap_y, pixmap_width, pixmap_height)
 
-            # Get parameters from parent widget
-            angle = self.parent_widget.degree_slider.value() / 10.0  # Convert from tenths to degrees
-            spacing = self.parent_widget.thickness_spinbox.value()
-            num_lines = self.parent_widget.num_lines_spinbox.value()
-            origin_x = self.parent_widget.origin_x_spinbox.value()
-            origin_y = self.parent_widget.origin_y_spinbox.value()
-            line_length = self.parent_widget.line_length_spinbox.value()
+                # Dotted line pen
+                pen = QPen(Qt.red, 2, Qt.DotLine)
+                painter.setPen(pen)
 
-            # Convert angle to radians
-            angle_rad = math.radians(angle)
+                # Get parameters from parent widget
+                angle = self.parent_widget.degree_slider.value() / 10.0  # Convert from tenths to degrees
+                spacing = self.parent_widget.thickness_spinbox.value()
+                num_lines = self.parent_widget.num_lines_spinbox.value()
+                origin_x = self.parent_widget.origin_x_spinbox.value()
+                origin_y = self.parent_widget.origin_y_spinbox.value()
+                line_length = self.parent_widget.line_length_spinbox.value()
 
-            # Calculate perpendicular direction for spacing
-            perp_angle_rad = angle_rad + math.pi / 2
+                # Convert angle to radians
+                angle_rad = math.radians(angle)
 
-            # Draw multiple parallel lines
-            for i in range(num_lines):
-                # Calculate offset from origin for this line
-                offset = (i - (num_lines - 1) / 2) * spacing
+                # Calculate perpendicular direction for spacing
+                perp_angle_rad = angle_rad + math.pi / 2
 
-                # Calculate the center point of this line (offset perpendicular to line direction)
-                center_x = origin_x + offset * math.cos(perp_angle_rad)
-                center_y = origin_y + offset * math.sin(perp_angle_rad)
+                # Draw multiple parallel lines
+                for i in range(num_lines):
+                    # Calculate offset from origin for this line
+                    offset = (i - (num_lines - 1) / 2) * spacing
 
-                # Calculate line endpoints using the specified line length
-                half_length = line_length / 2
+                    # Calculate the center point of this line (offset perpendicular to line direction)
+                    center_x = origin_x + offset * math.cos(perp_angle_rad)
+                    center_y = origin_y + offset * math.sin(perp_angle_rad)
 
-                # Start and end points along the line direction
-                x1 = center_x - half_length * math.cos(angle_rad)
-                y1 = center_y - half_length * math.sin(angle_rad)
-                x2 = center_x + half_length * math.cos(angle_rad)
-                y2 = center_y + half_length * math.sin(angle_rad)
+                    # Calculate line endpoints using the specified line length
+                    half_length = line_length / 2
 
-                # Translate to pixmap coordinates
-                x1 += pixmap_x
-                y1 += pixmap_y
-                x2 += pixmap_x
-                y2 += pixmap_y
+                    # Start and end points along the line direction
+                    x1 = center_x - half_length * math.cos(angle_rad)
+                    y1 = center_y - half_length * math.sin(angle_rad)
+                    x2 = center_x + half_length * math.cos(angle_rad)
+                    y2 = center_y + half_length * math.sin(angle_rad)
+
+                    # Translate to pixmap coordinates
+                    x1 += pixmap_x
+                    y1 += pixmap_y
+                    x2 += pixmap_x
+                    y2 += pixmap_y
 
                 # Draw the line
                 painter.drawLine(QPointF(x1, y1), QPointF(x2, y2))
